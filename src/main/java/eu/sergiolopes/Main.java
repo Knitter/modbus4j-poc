@@ -13,10 +13,14 @@ import java.nio.ByteBuffer;
 public class Main {
 
     public static void main(String[] args) {
-        //TODO: FIX THIS!
+        //Demo default: "192.168.1.74"
+		if(args.length == 0 || "".equals(args[0])) {
+			System.out.println("Missing HOST address");
+			System.exit(1);
+		}
 
         var transport = NettyTcpClientTransport.create(cfg -> {
-            cfg.hostname = "192.168.1.74";
+            cfg.hostname = args[0];
             cfg.port = 502;
         });
 
@@ -26,6 +30,14 @@ public class Main {
             ReadHoldingRegistersResponse response = null;
 
             int loopCount = 100;
+			if(args.length == 2) {
+			    try {
+                    loopCount = Integer.parseInt(args[1]);
+			    } catch (NumberFormatException e) {
+				    System.err.println("Invalid loop count parameter, not a parsable Integer. Defaulting to 100 iterations.");
+			   }
+			}
+			
             while (loopCount-- > 0) {
                 response = client.readHoldingRegisters(1, new ReadHoldingRegistersRequest(0, 1));
                 System.out.println("FIRE S1:" + ByteBuffer.wrap(response.registers()).getShort());
